@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from telethon import TelegramClient, events
+from telethon.sessions import StringSession
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -14,6 +15,7 @@ API_ID = os.getenv("TELEGRAM_API_ID")
 API_HASH = os.getenv("TELEGRAM_API_HASH")
 BOT_TARGET = os.getenv("TELEGRAM_BOT_TARGET", "@paumes_bot")
 SESSION_NAME = os.getenv("TELEGRAM_SESSION_NAME", "session_faust")
+STRING_SESSION = os.getenv("TELEGRAM_STRING_SESSION")
 
 app = FastAPI(title="Smart Proxying API")
 
@@ -31,7 +33,10 @@ client = None
 async def get_telegram_client():
     global client
     if client is None:
-        client = TelegramClient(SESSION_NAME, API_ID, API_HASH)
+        if STRING_SESSION:
+            client = TelegramClient(StringSession(STRING_SESSION), API_ID, API_HASH)
+        else:
+            client = TelegramClient(SESSION_NAME, API_ID, API_HASH)
         await client.start()
     return client
 
